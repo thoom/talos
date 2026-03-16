@@ -1,12 +1,8 @@
-> [!WARNING] **Предупреждение о безопасности: сайт-имитатор**
+> [!WARNING]
+> **Временное уведомление (на этой неделе): сниженная доступность мейнтейнера**
 >
-> **ohmyopencode.com НЕ аффилирован с этим проектом.** Мы не управляем этим сайтом и не одобряем его.
->
-> OhMyOpenCode — **бесплатный и открытый проект**. Не скачивайте установщики и не вводите платёжные данные на сторонних сайтах, которые называют себя «официальными».
->
-> Поскольку сайт-имитатор находится за платным доступом, мы **не можем проверить, что именно он распространяет**. Относитесь к любым загрузкам с него как к **потенциально небезопасным**.
->
-> ✅ Официальные загрузки: https://github.com/code-yeongyu/oh-my-opencode/releases
+> Ключевой мейнтейнер Q получил травму, поэтому на этой неделе ответы по issue/PR и релизы могут задерживаться.
+> Спасибо за терпение и поддержку.
 
 > [!NOTE]
 >
@@ -23,9 +19,9 @@
 
 <!-- <CENTERED SECTION FOR GITHUB DISPLAY> --> <div align="center">
 
-[![Oh My OpenCode](./.github/assets/hero.jpg)](https://github.com/code-yeongyu/oh-my-opencode#oh-my-opencode)
+[![Oh My OpenCode](./.github/assets/hero.jpg)](https://github.com/code-yeongyu/oh-my-openagent#oh-my-opencode)
 
-[![Preview](./.github/assets/omo.png)](https://github.com/code-yeongyu/oh-my-opencode#oh-my-opencode)
+[![Preview](./.github/assets/omo.png)](https://github.com/code-yeongyu/oh-my-openagent#oh-my-opencode)
 
 </div>
 
@@ -35,7 +31,7 @@
 
 <div align="center">
 
-[![GitHub Release](https://img.shields.io/github/v/release/code-yeongyu/oh-my-opencode?color=369eff&labelColor=black&logo=github&style=flat-square)](https://github.com/code-yeongyu/oh-my-opencode/releases) [![npm downloads](https://img.shields.io/npm/dt/oh-my-opencode?color=ff6b35&labelColor=black&style=flat-square)](https://www.npmjs.com/package/oh-my-opencode) [![GitHub Contributors](https://img.shields.io/github/contributors/code-yeongyu/oh-my-opencode?color=c4f042&labelColor=black&style=flat-square)](https://github.com/code-yeongyu/oh-my-opencode/graphs/contributors) [![GitHub Forks](https://img.shields.io/github/forks/code-yeongyu/oh-my-opencode?color=8ae8ff&labelColor=black&style=flat-square)](https://github.com/code-yeongyu/oh-my-opencode/network/members) [![GitHub Stars](https://img.shields.io/github/stars/code-yeongyu/oh-my-opencode?color=ffcb47&labelColor=black&style=flat-square)](https://github.com/code-yeongyu/oh-my-opencode/stargazers) [![GitHub Issues](https://img.shields.io/github/issues/code-yeongyu/oh-my-opencode?color=ff80eb&labelColor=black&style=flat-square)](https://github.com/code-yeongyu/oh-my-opencode/issues) [![License](https://img.shields.io/badge/license-SUL--1.0-white?labelColor=black&style=flat-square)](https://github.com/code-yeongyu/oh-my-opencode/blob/master/LICENSE.md) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/code-yeongyu/oh-my-opencode)
+[![GitHub Release](https://img.shields.io/github/v/release/code-yeongyu/oh-my-openagent?color=369eff&labelColor=black&logo=github&style=flat-square)](https://github.com/code-yeongyu/oh-my-openagent/releases) [![npm downloads](https://img.shields.io/npm/dt/oh-my-opencode?color=ff6b35&labelColor=black&style=flat-square)](https://www.npmjs.com/package/oh-my-opencode) [![GitHub Contributors](https://img.shields.io/github/contributors/code-yeongyu/oh-my-openagent?color=c4f042&labelColor=black&style=flat-square)](https://github.com/code-yeongyu/oh-my-openagent/graphs/contributors) [![GitHub Forks](https://img.shields.io/github/forks/code-yeongyu/oh-my-openagent?color=8ae8ff&labelColor=black&style=flat-square)](https://github.com/code-yeongyu/oh-my-openagent/network/members) [![GitHub Stars](https://img.shields.io/github/stars/code-yeongyu/oh-my-openagent?color=ffcb47&labelColor=black&style=flat-square)](https://github.com/code-yeongyu/oh-my-openagent/stargazers) [![GitHub Issues](https://img.shields.io/github/issues/code-yeongyu/oh-my-openagent?color=ff80eb&labelColor=black&style=flat-square)](https://github.com/code-yeongyu/oh-my-openagent/issues) [![License](https://img.shields.io/badge/license-SUL--1.0-white?labelColor=black&style=flat-square)](https://github.com/code-yeongyu/oh-my-openagent/blob/master/LICENSE.md) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/code-yeongyu/oh-my-openagent)
 
 English | 한국어 | 日本語 | 简体中文 | Русский
 
@@ -81,7 +77,7 @@ English | 한국어 | 日本語 | 简体中文 | Русский
 
 ```
 Install and configure oh-my-opencode by following the instructions here:
-https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/refs/heads/master/docs/guide/installation.md
+https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/refs/heads/dev/docs/guide/installation.md
 ```
 
 Или прочитайте руководство по установке, но серьёзно — пусть агент сделает это за вас. Люди ошибаются в конфигах.
@@ -91,7 +87,7 @@ https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/refs/heads/master/
 Загрузите руководство по установке и следуйте ему:
 
 ```bash
-curl -s https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/refs/heads/master/docs/guide/installation.md
+curl -s https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/refs/heads/dev/docs/guide/installation.md
 ```
 
 ------
@@ -101,7 +97,7 @@ curl -s https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/refs/heads
 Мы вышли за пределы эпохи чтения документации. Просто вставьте это в своего агента:
 
 ```
-Read this and tell me why it's not just another boilerplate: https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/refs/heads/dev/README.md
+Read this and tell me why it's not just another boilerplate: https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/refs/heads/dev/README.md
 ```
 
 ## Ключевые возможности
@@ -121,23 +117,23 @@ Read this and tell me why it's not just another boilerplate: https://raw.githubu
 - [Тариф GLM Coding ($10)](https://z.ai/subscribe)
 - При доступе к оплате за токены использование моделей Kimi и Gemini обойдётся недорого.
 
-|      | Функция                                                  | Что делает                                                   |
-| ---- | -------------------------------------------------------- | ------------------------------------------------------------ |
-| 🤖    | **Дисциплинированные агенты**                            | Sisyphus оркестрирует Hephaestus, Oracle, Librarian, Explore. Полноценная AI-команда разработки в параллельном режиме. |
-| ⚡    | **`ultrawork` / `ulw`**                                  | Одно слово. Все агенты активируются. Не останавливается, пока задача не выполнена. |
-| 🚪    | **[IntentGate](https://factory.ai/news/terminal-bench)** | Анализирует истинное намерение пользователя перед классификацией и действием. Никакого буквального неверного толкования. |
-| 🔗    | **Инструмент правок на основе хэш-якорей**               | Хэш содержимого `LINE#ID` проверяет каждое изменение. Ноль ошибок с устаревшими строками. Вдохновлено [oh-my-pi](https://github.com/can1357/oh-my-pi). [Проблема обвязки →](https://blog.can.ac/2026/02/12/the-harness-problem/) |
-| 🛠️    | **LSP + AST-Grep**                                       | Переименование в рабочем пространстве, диагностика перед сборкой, переписывание с учётом AST. Точность IDE для агентов. |
-| 🧠    | **Фоновые агенты**                                       | Запускайте 5+ специалистов параллельно. Контекст остаётся компактным. Результаты — когда готовы. |
-| 📚    | **Встроенные MCP**                                       | Exa (веб-поиск), Context7 (официальная документация), Grep.app (поиск по GitHub). Всегда включены. |
-| 🔁    | **Ralph Loop / `/ulw-loop`**                             | Самореферентный цикл. Не останавливается, пока задача не выполнена на 100%. |
-| ✅    | **Todo Enforcer**                                        | Агент завис? Система немедленно возвращает его в работу. Ваша задача будет выполнена, точка. |
-| 💬    | **Comment Checker**                                      | Никакого AI-мусора в комментариях. Код читается так, словно его писал опытный разработчик. |
-| 🖥️    | **Интеграция с Tmux**                                    | Полноценный интерактивный терминал. REPL, дебаггеры, TUI. Всё живое. |
-| 🔌    | **Совместимость с Claude Code**                          | Ваши хуки, команды, навыки, MCP и плагины? Всё работает без изменений. |
-| 🎯    | **MCP, встроенные в навыки**                             | Навыки несут собственные MCP-серверы. Никакого раздувания контекста. |
-| 📋    | **Prometheus Planner**                                   | Стратегическое планирование в режиме интервью перед любым выполнением. |
-| 🔍    | **`/init-deep`**                                         | Автоматически генерирует иерархические файлы `AGENTS.md` по всему проекту. Отлично работает на эффективность токенов и производительность агента. |
+|     | Функция                                                  | Что делает                                                                                                                                                                                                                       |
+| --- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🤖   | **Дисциплинированные агенты**                            | Sisyphus оркестрирует Hephaestus, Oracle, Librarian, Explore. Полноценная AI-команда разработки в параллельном режиме.                                                                                                           |
+| ⚡   | **`ultrawork` / `ulw`**                                  | Одно слово. Все агенты активируются. Не останавливается, пока задача не выполнена.                                                                                                                                               |
+| 🚪   | **[IntentGate](https://factory.ai/news/terminal-bench)** | Анализирует истинное намерение пользователя перед классификацией и действием. Никакого буквального неверного толкования.                                                                                                         |
+| 🔗   | **Инструмент правок на основе хэш-якорей**               | Хэш содержимого `LINE#ID` проверяет каждое изменение. Ноль ошибок с устаревшими строками. Вдохновлено [oh-my-pi](https://github.com/can1357/oh-my-pi). [Проблема обвязки →](https://blog.can.ac/2026/02/12/the-harness-problem/) |
+| 🛠️   | **LSP + AST-Grep**                                       | Переименование в рабочем пространстве, диагностика перед сборкой, переписывание с учётом AST. Точность IDE для агентов.                                                                                                          |
+| 🧠   | **Фоновые агенты**                                       | Запускайте 5+ специалистов параллельно. Контекст остаётся компактным. Результаты — когда готовы.                                                                                                                                 |
+| 📚   | **Встроенные MCP**                                       | Exa (веб-поиск), Context7 (официальная документация), Grep.app (поиск по GitHub). Всегда включены.                                                                                                                               |
+| 🔁   | **Ralph Loop / `/ulw-loop`**                             | Самореферентный цикл. Не останавливается, пока задача не выполнена на 100%.                                                                                                                                                      |
+| ✅   | **Todo Enforcer**                                        | Агент завис? Система немедленно возвращает его в работу. Ваша задача будет выполнена, точка.                                                                                                                                     |
+| 💬   | **Comment Checker**                                      | Никакого AI-мусора в комментариях. Код читается так, словно его писал опытный разработчик.                                                                                                                                       |
+| 🖥️   | **Интеграция с Tmux**                                    | Полноценный интерактивный терминал. REPL, дебаггеры, TUI. Всё живое.                                                                                                                                                             |
+| 🔌   | **Совместимость с Claude Code**                          | Ваши хуки, команды, навыки, MCP и плагины? Всё работает без изменений.                                                                                                                                                           |
+| 🎯   | **MCP, встроенные в навыки**                             | Навыки несут собственные MCP-серверы. Никакого раздувания контекста.                                                                                                                                                             |
+| 📋   | **Prometheus Planner**                                   | Стратегическое планирование в режиме интервью перед любым выполнением.                                                                                                                                                           |
+| 🔍   | **`/init-deep`**                                         | Автоматически генерирует иерархические файлы `AGENTS.md` по всему проекту. Отлично работает на эффективность токенов и производительность агента.                                                                                |
 
 ### Дисциплинированные агенты
 
@@ -268,7 +264,7 @@ project/
    ```bash
    # Удалить пользовательский конфиг
    rm -f ~/.config/opencode/oh-my-opencode.json ~/.config/opencode/oh-my-opencode.jsonc
-   
+
    # Удалить конфиг проекта (если существует)
    rm -f .opencode/oh-my-opencode.json .opencode/oh-my-opencode.jsonc
    ```

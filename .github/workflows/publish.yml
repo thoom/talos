@@ -121,7 +121,7 @@ jobs:
   publish-main:
     runs-on: ubuntu-latest
     needs: [test, typecheck]
-    if: github.repository == 'code-yeongyu/oh-my-opencode'
+    if: github.repository == 'code-yeongyu/oh-my-openagent'
     outputs:
       version: ${{ steps.version.outputs.version }}
       dist_tag: ${{ steps.version.outputs.dist_tag }}
@@ -204,7 +204,7 @@ jobs:
           bunx tsc --emitDeclarationOnly
           bun run build:schema
 
-      - name: Publish main package
+      - name: Publish oh-my-opencode
         if: steps.check.outputs.skip != 'true'
         run: |
           TAG_ARG=""
@@ -213,20 +213,8 @@ jobs:
           fi
           npm publish --access public --provenance $TAG_ARG
         env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
-
-      - name: Git commit and tag
-        if: steps.check.outputs.skip != 'true'
-        run: |
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config user.name "github-actions[bot]"
-          git add package.json assets/oh-my-opencode.schema.json packages/*/package.json || true
-          git diff --cached --quiet || git commit -m "release: v${{ steps.version.outputs.version }}"
-          git tag -f "v${{ steps.version.outputs.version }}"
-          git push origin --tags --force
-          git push origin HEAD || echo "Branch push failed (non-critical)"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   trigger-platform:
     runs-on: ubuntu-latest

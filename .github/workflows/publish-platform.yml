@@ -82,6 +82,11 @@ jobs:
           cd packages/${{ matrix.platform }}
           jq --arg v "$VERSION" '.version = $v' package.json > tmp.json && mv tmp.json package.json
 
+      - name: Set root package version
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          jq --arg v "${{ inputs.version }}" '.version = $v' package.json > tmp.json && mv tmp.json package.json
+
       - name: Pre-download baseline compile target
         if: steps.check.outputs.skip != 'true' && endsWith(matrix.platform, '-baseline')
         shell: bash
@@ -192,12 +197,6 @@ jobs:
           retention-days: 1
           if-no-files-found: error
 
-  # =============================================================================
-  # Job 2: Publish all platforms using OIDC/Provenance
-  # - Runs on ubuntu-latest for ALL platforms (just downloading artifacts)
-  # - Uses npm Trusted Publishing (OIDC) - no NODE_AUTH_TOKEN needed
-  # - Fresh OIDC token at publish time avoids timeout issues
-  # =============================================================================
   publish:
     needs: build
     if: always() && !cancelled()
@@ -208,7 +207,7 @@ jobs:
       matrix:
         platform: [darwin-arm64, darwin-x64, darwin-x64-baseline, linux-x64, linux-x64-baseline, linux-arm64, linux-x64-musl, linux-x64-musl-baseline, linux-arm64-musl, windows-x64, windows-x64-baseline]
     steps:
-      - name: Check if already published
+      - name: Check if oh-my-opencode already published
         id: check
         run: |
           PKG_NAME="oh-my-opencode-${{ matrix.platform }}"

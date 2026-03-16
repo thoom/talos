@@ -23,7 +23,7 @@ import {
 
 export { resolveCategoryConfig } from "./categories"
 export type { SyncSessionCreatedEvent, DelegateTaskToolOptions, BuildSystemContentInput } from "./types"
-export { buildSystemContent } from "./prompt-builder"
+export { buildSystemContent, buildTaskPrompt } from "./prompt-builder"
 
 export function createDelegateTask(options: DelegateTaskToolOptions): ToolDefinition {
   const { userCategories } = options
@@ -123,7 +123,11 @@ export function createDelegateTask(options: DelegateTaskToolOptions): ToolDefini
       })
 
       if (args.run_in_background === undefined) {
-        throw new Error(`Invalid arguments: 'run_in_background' parameter is REQUIRED. Use run_in_background=false for task delegation, run_in_background=true only for parallel exploration.`)
+        if (args.category || args.subagent_type || args.session_id) {
+          args.run_in_background = false
+        } else {
+          throw new Error(`Invalid arguments: 'run_in_background' parameter is REQUIRED. Use run_in_background=false for task delegation, run_in_background=true only for parallel exploration.`)
+        }
       }
       if (typeof args.load_skills === "string") {
         try {

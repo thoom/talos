@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { AnyMcpNameSchema } from "../../mcp/types"
-import { BuiltinAgentNameSchema, BuiltinSkillNameSchema } from "./agent-names"
+import { BuiltinSkillNameSchema } from "./agent-names"
 import { AgentOverridesSchema } from "./agent-overrides"
 import { BabysittingConfigSchema } from "./babysitting"
 import { BackgroundTaskConfigSchema } from "./background-task"
