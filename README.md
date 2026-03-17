@@ -1,9 +1,15 @@
 # Talos
 
 > [!IMPORTANT]
-> This project is a **derivative work** and a **modified version** of [**oh-my-opencode**](https://github.com/code-yeongyu/oh-my-opencode).
+> Talos is a specialized fork of [**oh-my-opencode**](https://github.com/code-yeongyu/oh-my-opencode) that prioritizes **Vigilance** and **Discipline** over speed.
 > 
 > **Talos** introduces structural enforcement for code quality (Argus) and restricts Sisyphus to pure orchestration. All original licensing and attribution to the upstream project are preserved. Distributed under the [Sustainable Use License 1.0](https://github.com/code-yeongyu/oh-my-opencode/blob/dev/LICENSE.md).
+
+## What's Different in this Fork
+
+* **Argus: The Mandatory Reviewer** — A dedicated code reviewer that must return `APPROVED` before any task can be declared complete. Argus checks every line for logic, security, and edge cases. There is no manual override.
+* **Sisyphus: The Pure Orchestrator** — Permissions for `write`, `edit`, and `apply_patch` are removed at the engine level. Sisyphus plans, delegates to specialists, and verifies. It never writes code directly.
+* **Structural Coexistence** — This fork is designed to coexist with upstream **oh-my-opencode** configurations while enforcing its own rigorous quality gates.
 
 ---
 
@@ -85,21 +91,6 @@
 > "Oh My OpenCode Is Actually Insane" - [YouTube - Darren Builds AI](https://www.youtube.com/watch?v=G_Snfh2M41M)
 
 ---
-
----
-
-## The Talos Philosophy
-
-Talos is a specialized fork of **oh-my-opencode** that prioritizes **Vigilance** and **Discipline** over speed.
-
-### What's Different in this Fork
-
-* **Argus: The Mandatory Reviewer** — A dedicated code reviewer that must return `APPROVED` before any task can be declared complete. Argus checks every line for logic, security, and edge cases. There is no manual override.
-* **Sisyphus: The Pure Orchestrator** — Permissions for `write`, `edit`, and `apply_patch` are removed at the engine level. Sisyphus plans, delegates to specialists, and verifies. It never writes code directly.
-* **Structural Coexistence** — This fork is designed to coexist with upstream **oh-my-opencode** configurations while enforcing its own rigorous quality gates.
-
-> [!NOTE]
-> All core agent frameworks, tools, and the underlying orchestration system are credited to **oh-my-opencode**. This fork builds upon that foundation to provide a "Strict Mode" for professional engineering.
 
 ---
 
