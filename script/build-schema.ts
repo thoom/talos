@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { createOhMyOpenCodeJsonSchema } from "./build-schema-document"
+import { createOhMyOpenCodeJsonSchema, createTalosJsonSchema } from "./build-schema-document"
 
 const SCHEMA_OUTPUT_PATH = "assets/oh-my-opencode.schema.json"
 const DIST_SCHEMA_OUTPUT_PATH = "dist/oh-my-opencode.schema.json"
@@ -24,21 +24,13 @@ function stripTalosOnlyAgents(schema: Record<string, unknown>): Record<string, u
 async function main() {
   console.log("Generating JSON Schema...")
 
-  const fullSchema = createOhMyOpenCodeJsonSchema()
-
-  // Talos schema — full, includes argus and any future talos-only agents
-  const talosSchema = {
-    ...fullSchema,
-    $id: fullSchema.$id?.toString().replace("oh-my-opencode.schema.json", "talos.schema.json"),
-    title: "Talos Configuration",
-    description: "Configuration schema for talos plugin",
-  }
+  const talosSchema = createTalosJsonSchema()
   await Bun.write(TALOS_SCHEMA_OUTPUT_PATH, JSON.stringify(talosSchema, null, 2))
   await Bun.write(TALOS_DIST_SCHEMA_OUTPUT_PATH, JSON.stringify(talosSchema, null, 2))
   console.log(`✓ Talos Schema generated: ${TALOS_SCHEMA_OUTPUT_PATH}`)
 
   // OMO schema — upstream-clean, no talos-only agents
-  const omoSchema = stripTalosOnlyAgents(fullSchema)
+  const omoSchema = stripTalosOnlyAgents(createOhMyOpenCodeJsonSchema())
   await Bun.write(SCHEMA_OUTPUT_PATH, JSON.stringify(omoSchema, null, 2))
   await Bun.write(DIST_SCHEMA_OUTPUT_PATH, JSON.stringify(omoSchema, null, 2))
   console.log(`✓ OMO Schema generated: ${SCHEMA_OUTPUT_PATH}`)

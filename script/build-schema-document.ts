@@ -15,3 +15,12 @@ export function createOhMyOpenCodeJsonSchema(): Record<string, unknown> {
     ...jsonSchema,
   }
 }
+
+export function createTalosJsonSchema(): Record<string, unknown> {
+  return {
+    ...createOhMyOpenCodeJsonSchema(),
+    $id: "https://raw.githubusercontent.com/thoom/talos/dev/assets/talos.schema.json",
+    title: "Talos Configuration",
+    description: "Configuration schema for talos plugin",
+  }
+}

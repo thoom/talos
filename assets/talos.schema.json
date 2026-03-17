@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/dev/assets/better-oh-my-opencode.schema.json",
-  "title": "Better Oh My OpenCode Configuration",
-  "description": "Configuration schema for better-oh-my-opencode plugin",
+  "$id": "https://raw.githubusercontent.com/thoom/talos/dev/assets/talos.schema.json",
+  "title": "Talos Configuration",
+  "description": "Configuration schema for talos plugin",
   "type": "object",
   "properties": {
     "$schema": {
@@ -3897,6 +3897,16 @@
             "minimum": 0
           }
         },
+        "maxDepth": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "maxDescendants": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
         "staleTimeoutMs": {
           "type": "number",
           "minimum": 60000
@@ -3951,11 +3961,16 @@
         "include_co_authored_by": {
           "default": true,
           "type": "boolean"
+        },
+        "git_env_prefix": {
+          "default": "GIT_MASTER=1",
+          "type": "string"
         }
       },
       "required": [
         "commit_footer",
-        "include_co_authored_by"
+        "include_co_authored_by",
+        "git_env_prefix"
       ],
       "additionalProperties": false
     },
