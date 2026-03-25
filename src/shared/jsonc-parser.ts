@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from "node:fs"
+import { join } from "node:path"
 import { parse, ParseError, printParseErrorCode } from "jsonc-parser"
 
 export interface JsoncParseResult<T> {
@@ -63,4 +64,19 @@ export function detectConfigFile(basePath: string): {
     return { format: "json", path: jsonPath }
   }
   return { format: "none", path: jsonPath }
+}
+
+import { PLUGIN_NAME, LEGACY_PLUGIN_NAME } from "./plugin-identity"
+
+const PLUGIN_CONFIG_NAMES = [PLUGIN_NAME, LEGACY_PLUGIN_NAME] as const
+
+export function detectPluginConfigFile(dir: string): {
+  format: "json" | "jsonc" | "none"
+  path: string
+} {
+  for (const name of PLUGIN_CONFIG_NAMES) {
+    const result = detectConfigFile(join(dir, name))
+    if (result.format !== "none") return result
+  }
+  return { format: "none", path: join(dir, PLUGIN_CONFIG_NAMES[0] + ".json") }
 }

@@ -7,7 +7,7 @@ import {
   getOpenCodeConfigDir,
   addConfigLoadError,
   parseJsonc,
-  detectConfigFile,
+  detectPluginConfigFile,
   migrateConfigFile,
 } from "./shared";
 
@@ -162,28 +162,19 @@ export function loadPluginConfig(
 ): OhMyOpenCodeConfig {
   // User-level config path - prefer talos over oh-my-opencode, .jsonc over .json
   const configDir = getOpenCodeConfigDir({ binary: "opencode" });
-  const talosUserBasePath = path.join(configDir, "talos");
-  const talosUserDetected = detectConfigFile(talosUserBasePath);
-  const userBasePath = path.join(configDir, "oh-my-opencode");
-  const userDetected = detectConfigFile(userBasePath);
+  const userDetected = detectPluginConfigFile(configDir);
   const userConfigPath =
-    talosUserDetected.format !== "none"
-      ? talosUserDetected.path
-      : userDetected.format !== "none"
-        ? userDetected.path
-        : talosUserBasePath + ".jsonc";
+    userDetected.format !== "none"
+      ? userDetected.path
+      : path.join(configDir, "talos.json");
 
-  // Project-level config path - prefer talos over oh-my-opencode, .jsonc over .json
-  const talosProjectBasePath = path.join(directory, ".opencode", "talos");
-  const talosProjectDetected = detectConfigFile(talosProjectBasePath);
-  const projectBasePath = path.join(directory, ".opencode", "oh-my-opencode");
-  const projectDetected = detectConfigFile(projectBasePath);
+  // Project-level config path - prefer .jsonc over .json
+  const projectBasePath = path.join(directory, ".opencode");
+  const projectDetected = detectPluginConfigFile(projectBasePath);
   const projectConfigPath =
-    talosProjectDetected.format !== "none"
-      ? talosProjectDetected.path
-      : projectDetected.format !== "none"
-        ? projectDetected.path
-        : talosProjectBasePath + ".jsonc";
+    projectDetected.format !== "none"
+      ? projectDetected.path
+      : path.join(projectBasePath, "talos.json");
 
   // Load user config first (base)
   let config: OhMyOpenCodeConfig =

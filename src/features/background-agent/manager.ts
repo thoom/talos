@@ -15,6 +15,7 @@ import {
   resolveInheritedPromptTools,
   createInternalAgentTextPart,
 } from "../../shared"
+import { applySessionPromptParams } from "../../shared/session-prompt-params-helpers"
 import { setSessionTools } from "../../shared/session-tools-store"
 import { SessionCategoryRegistry } from "../../shared/session-category-registry"
 import { ConcurrencyManager } from "./concurrency"
@@ -27,6 +28,7 @@ import {
 import {
   POLLING_INTERVAL_MS,
   TASK_CLEANUP_DELAY_MS,
+  TASK_TTL_MS,
 } from "./constants"
 
 import { subagentSessions } from "../claude-code-session-state"
@@ -51,6 +53,13 @@ import { join } from "node:path"
 import { pruneStaleTasksAndNotifications } from "./task-poller"
 import { checkAndInterruptStaleTasks } from "./task-poller"
 import { removeTaskToastTracking } from "./remove-task-toast-tracking"
+import { isActiveSessionStatus, isTerminalSessionStatus } from "./session-status-classifier"
+import {
+  detectRepetitiveToolUse,
+  recordToolCall,
+  resolveCircuitBreakerSettings,
+  type CircuitBreakerSettings,
+} from "./loop-detector"
 import {
   createSubagentDepthLimitError,
   createSubagentDescendantLimitError,
@@ -64,9 +73,11 @@ type OpencodeClient = PluginInput["client"]
 
 
 interface MessagePartInfo {
+  id?: string
   sessionID?: string
   type?: string
   tool?: string
+  state?: { status?: string; input?: Record<string, unknown> }
 }
 
 interface EventProperties {
@@ -78,6 +89,19 @@ interface EventProperties {
 interface Event {
   type: string
   properties?: EventProperties
+}
+
+function resolveMessagePartInfo(properties: EventProperties | undefined): MessagePartInfo | undefined {
+  if (!properties || typeof properties !== "object") {
+    return undefined
+  }
+
+  const nestedPart = properties.part
+  if (nestedPart && typeof nestedPart === "object") {
+    return nestedPart as MessagePartInfo
+  }
+
+  return properties as MessagePartInfo
 }
 
 interface Todo {
@@ -99,6 +123,8 @@ export interface SubagentSessionCreatedEvent {
 }
 
 export type OnSubagentSessionCreated = (event: SubagentSessionCreatedEvent) => Promise<void>
+
+const MAX_TASK_REMOVAL_RESCHEDULES = 6
 
 export class BackgroundManager {
 
@@ -128,6 +154,7 @@ export class BackgroundManager {
   private preStartDescendantReservations: Set<string>
   private enableParentSessionNotifications: boolean
   readonly taskHistory = new TaskHistory()
+  private cachedCircuitBreakerSettings?: CircuitBreakerSettings
 
   constructor(
     ctx: PluginInput,
@@ -478,13 +505,19 @@ export class BackgroundManager {
     })
 
     // Fire-and-forget prompt via promptAsync (no response body needed)
-    // Include model if caller provided one (e.g., from Sisyphus category configs)
-    // IMPORTANT: variant must be a top-level field in the body, NOT nested inside model
-    // OpenCode's PromptInput schema expects: { model: { providerID, modelID }, variant: "max" }
+    // OpenCode prompt payload accepts model provider/model IDs and top-level variant only.
+    // Temperature/topP and provider-specific options are applied through chat.params.
     const launchModel = input.model
-      ? { providerID: input.model.providerID, modelID: input.model.modelID }
+      ? {
+          providerID: input.model.providerID,
+          modelID: input.model.modelID,
+        }
       : undefined
     const launchVariant = input.model?.variant
+
+    if (input.model) {
+      applySessionPromptParams(sessionID, input.model)
+    }
 
     promptWithModelSuggestionRetry(this.client, {
       path: { id: sessionID },
@@ -517,6 +550,9 @@ export class BackgroundManager {
           existingTask.error = errorMessage
         }
         existingTask.completedAt = new Date()
+        if (existingTask.rootSessionID) {
+          this.unregisterRootDescendant(existingTask.rootSessionID)
+        }
         if (existingTask.concurrencyKey) {
           this.concurrencyManager.release(existingTask.concurrencyKey)
           existingTask.concurrencyKey = undefined
@@ -720,6 +756,8 @@ export class BackgroundManager {
 
     existingTask.progress = {
       toolCalls: existingTask.progress?.toolCalls ?? 0,
+      toolCallWindow: existingTask.progress?.toolCallWindow,
+      countedToolPartIDs: existingTask.progress?.countedToolPartIDs,
       lastUpdate: new Date(),
     }
 
@@ -754,12 +792,18 @@ export class BackgroundManager {
     })
 
     // Fire-and-forget prompt via promptAsync (no response body needed)
-    // Include model if task has one (preserved from original launch with category config)
-    // variant must be top-level in body, not nested inside model (OpenCode PromptInput schema)
+    // Resume uses the same PromptInput contract as launch: model IDs plus top-level variant.
     const resumeModel = existingTask.model
-      ? { providerID: existingTask.model.providerID, modelID: existingTask.model.modelID }
+      ? {
+          providerID: existingTask.model.providerID,
+          modelID: existingTask.model.modelID,
+        }
       : undefined
     const resumeVariant = existingTask.model?.variant
+
+    if (existingTask.model) {
+      applySessionPromptParams(existingTask.sessionID!, existingTask.model)
+    }
 
     this.client.session.promptAsync({
       path: { id: existingTask.sessionID },
@@ -785,6 +829,9 @@ export class BackgroundManager {
       const errorMessage = error instanceof Error ? error.message : String(error)
       existingTask.error = errorMessage
       existingTask.completedAt = new Date()
+      if (existingTask.rootSessionID) {
+        this.unregisterRootDescendant(existingTask.rootSessionID)
+      }
 
       // Release concurrency on error to prevent slot leaks
       if (existingTask.concurrencyKey) {
@@ -852,8 +899,7 @@ export class BackgroundManager {
     }
 
     if (event.type === "message.part.updated" || event.type === "message.part.delta") {
-      if (!props || typeof props !== "object" || !("sessionID" in props)) return
-      const partInfo = props as unknown as MessagePartInfo
+      const partInfo = resolveMessagePartInfo(props)
       const sessionID = partInfo?.sessionID
       if (!sessionID) return
 
@@ -876,8 +922,65 @@ export class BackgroundManager {
       task.progress.lastUpdate = new Date()
 
       if (partInfo?.type === "tool" || partInfo?.tool) {
+        const countedToolPartIDs = task.progress.countedToolPartIDs ?? new Set<string>()
+        const shouldCountToolCall =
+          !partInfo.id ||
+          partInfo.state?.status !== "running" ||
+          !countedToolPartIDs.has(partInfo.id)
+
+        if (!shouldCountToolCall) {
+          return
+        }
+
+        if (partInfo.id && partInfo.state?.status === "running") {
+          countedToolPartIDs.add(partInfo.id)
+          task.progress.countedToolPartIDs = countedToolPartIDs
+        }
+
         task.progress.toolCalls += 1
         task.progress.lastTool = partInfo.tool
+        const circuitBreaker = this.cachedCircuitBreakerSettings ?? (this.cachedCircuitBreakerSettings = resolveCircuitBreakerSettings(this.config))
+        if (partInfo.tool) {
+         task.progress.toolCallWindow = recordToolCall(
+             task.progress.toolCallWindow,
+             partInfo.tool,
+             circuitBreaker,
+             partInfo.state?.input
+           )
+
+           if (circuitBreaker.enabled) {
+             const loopDetection = detectRepetitiveToolUse(task.progress.toolCallWindow)
+             if (loopDetection.triggered) {
+               log("[background-agent] Circuit breaker: consecutive tool usage detected", {
+                 taskId: task.id,
+                 agent: task.agent,
+                 sessionID,
+                 toolName: loopDetection.toolName,
+                 repeatedCount: loopDetection.repeatedCount,
+               })
+               void this.cancelTask(task.id, {
+                 source: "circuit-breaker",
+                 reason: `Subagent called ${loopDetection.toolName} ${loopDetection.repeatedCount} consecutive times (threshold: ${circuitBreaker.consecutiveThreshold}). This usually indicates an infinite loop. The task was automatically cancelled to prevent excessive token usage.`,
+               })
+               return
+             }
+           }
+        }
+
+        const maxToolCalls = circuitBreaker.maxToolCalls
+        if (task.progress.toolCalls >= maxToolCalls) {
+          log("[background-agent] Circuit breaker: tool call limit reached", {
+            taskId: task.id,
+            toolCalls: task.progress.toolCalls,
+            maxToolCalls,
+            agent: task.agent,
+            sessionID,
+          })
+          void this.cancelTask(task.id, {
+            source: "circuit-breaker",
+            reason: `Subagent exceeded maximum tool call limit (${maxToolCalls}). This usually indicates an infinite loop. The task was automatically cancelled to prevent excessive token usage.`,
+          })
+        }
       }
     }
 
@@ -925,6 +1028,9 @@ export class BackgroundManager {
       task.status = "error"
       task.error = errorMsg
       task.completedAt = new Date()
+      if (task.rootSessionID) {
+        this.unregisterRootDescendant(task.rootSessionID)
+      }
       this.taskHistory.record(task.parentSessionID, { id: task.id, sessionID: task.sessionID, agent: task.agent, description: task.description, status: "error", category: task.category, startedAt: task.startedAt, completedAt: task.completedAt })
 
       if (task.concurrencyKey) {
@@ -1188,7 +1294,7 @@ export class BackgroundManager {
     this.completedTaskSummaries.delete(parentSessionID)
   }
 
-  private scheduleTaskRemoval(taskId: string): void {
+  private scheduleTaskRemoval(taskId: string, rescheduleCount = 0): void {
     const existingTimer = this.completionTimers.get(taskId)
     if (existingTimer) {
       clearTimeout(existingTimer)
@@ -1198,17 +1304,29 @@ export class BackgroundManager {
     const timer = setTimeout(() => {
       this.completionTimers.delete(taskId)
       const task = this.tasks.get(taskId)
-      if (task) {
-        this.clearNotificationsForTask(taskId)
-        this.tasks.delete(taskId)
-        this.clearTaskHistoryWhenParentTasksGone(task.parentSessionID)
-        if (task.sessionID) {
-          subagentSessions.delete(task.sessionID)
-          SessionCategoryRegistry.remove(task.sessionID)
+      if (!task) return
+
+      if (task.parentSessionID) {
+        const siblings = this.getTasksByParentSession(task.parentSessionID)
+        const runningOrPendingSiblings = siblings.filter(
+          sibling => sibling.id !== taskId && (sibling.status === "running" || sibling.status === "pending"),
+        )
+        const completedAtTimestamp = task.completedAt?.getTime()
+        const reachedTaskTtl = completedAtTimestamp !== undefined && (Date.now() - completedAtTimestamp) >= TASK_TTL_MS
+        if (runningOrPendingSiblings.length > 0 && rescheduleCount < MAX_TASK_REMOVAL_RESCHEDULES && !reachedTaskTtl) {
+          this.scheduleTaskRemoval(taskId, rescheduleCount + 1)
+          return
         }
-        log("[background-agent] Removed completed task from memory:", taskId)
-        this.clearTaskHistoryWhenParentTasksGone(task?.parentSessionID)
       }
+
+      this.clearNotificationsForTask(taskId)
+      this.tasks.delete(taskId)
+      this.clearTaskHistoryWhenParentTasksGone(task.parentSessionID)
+      if (task.sessionID) {
+        subagentSessions.delete(task.sessionID)
+        SessionCategoryRegistry.remove(task.sessionID)
+      }
+      log("[background-agent] Removed completed task from memory:", taskId)
     }, TASK_CLEANUP_DELAY_MS)
 
     this.completionTimers.set(taskId, timer)
@@ -1245,8 +1363,12 @@ export class BackgroundManager {
       log("[background-agent] Cancelled pending task:", { taskId, key })
     }
 
+    const wasRunning = task.status === "running"
     task.status = "cancelled"
     task.completedAt = new Date()
+    if (wasRunning && task.rootSessionID) {
+      this.unregisterRootDescendant(task.rootSessionID)
+    }
     if (reason) {
       task.error = reason
     }
@@ -1366,6 +1488,10 @@ export class BackgroundManager {
     task.status = "completed"
     task.completedAt = new Date()
     this.taskHistory.record(task.parentSessionID, { id: task.id, sessionID: task.sessionID, agent: task.agent, description: task.description, status: "completed", category: task.category, startedAt: task.startedAt, completedAt: task.completedAt })
+
+    if (task.rootSessionID) {
+      this.unregisterRootDescendant(task.rootSessionID)
+    }
 
     removeTaskToastTracking(task.id)
 
@@ -1605,6 +1731,9 @@ Use \`background_output(task_id="${task.id}")\` to retrieve this result when rea
         task.status = "error"
         task.error = errorMessage
         task.completedAt = new Date()
+        if (!wasPending && task.rootSessionID) {
+          this.unregisterRootDescendant(task.rootSessionID)
+        }
         this.taskHistory.record(task.parentSessionID, { id: task.id, sessionID: task.sessionID, agent: task.agent, description: task.description, status: "error", category: task.category, startedAt: task.startedAt, completedAt: task.completedAt })
         if (task.concurrencyKey) {
           this.concurrencyManager.release(task.concurrencyKey)
@@ -1688,11 +1817,9 @@ Use \`background_output(task_id="${task.id}")\` to retrieve this result when rea
           }
         }
 
-        // Match sync-session-poller pattern: only skip completion check when
-        // status EXISTS and is not idle (i.e., session is actively running).
-        // When sessionStatus is undefined, the session has completed and dropped
-        // from the status response — fall through to completion detection.
-        if (sessionStatus && sessionStatus.type !== "idle") {
+        // Only skip completion when session status is actively running.
+        // Unknown or terminal statuses (like "interrupted") fall through to completion.
+        if (sessionStatus && isActiveSessionStatus(sessionStatus.type)) {
           log("[background-agent] Session still running, relying on event-based progress:", {
             taskId: task.id,
             sessionID,
@@ -1700,6 +1827,24 @@ Use \`background_output(task_id="${task.id}")\` to retrieve this result when rea
             toolCalls: task.progress?.toolCalls ?? 0,
           })
           continue
+        }
+
+        // Explicit terminal non-idle status (e.g., "interrupted") — complete immediately,
+        // skipping output validation (session will never produce more output).
+        // Unknown statuses fall through to the idle/gone path with output validation.
+        if (sessionStatus && isTerminalSessionStatus(sessionStatus.type)) {
+          await this.tryCompleteTask(task, `polling (terminal session status: ${sessionStatus.type})`)
+          continue
+        }
+
+        // Unknown non-idle status — not active, not terminal, not idle.
+        // Fall through to idle/gone completion path with output validation.
+        if (sessionStatus && sessionStatus.type !== "idle") {
+          log("[background-agent] Unknown session status, treating as potentially idle:", {
+            taskId: task.id,
+            sessionID,
+            sessionStatus: sessionStatus.type,
+          })
         }
 
         // Session is idle or no longer in status response (completed/disappeared)

@@ -1,4 +1,5 @@
 export const PLUGIN_NAME = "talos"
+export const LEGACY_PLUGIN_NAME = "oh-my-opencode"
 export const CONFIG_BASENAME = "talos"
 export const LOG_FILENAME = "talos.log"
 export const CACHE_DIR_NAME = "talos"

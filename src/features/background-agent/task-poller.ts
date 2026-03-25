@@ -9,12 +9,12 @@ import {
   DEFAULT_MESSAGE_STALENESS_TIMEOUT_MS,
   DEFAULT_STALE_TIMEOUT_MS,
   MIN_RUNTIME_BEFORE_STALE_MS,
+  TERMINAL_TASK_TTL_MS,
   TASK_TTL_MS,
 } from "./constants"
 import { removeTaskToastTracking } from "./remove-task-toast-tracking"
 
-const TERMINAL_TASK_TTL_MS = 30 * 60 * 1000
-
+import { isActiveSessionStatus } from "./session-status-classifier"
 const TERMINAL_TASK_STATUSES = new Set<BackgroundTask["status"]>([
   "completed",
   "error",
@@ -121,7 +121,7 @@ export async function checkAndInterruptStaleTasks(args: {
     if (!startedAt || !sessionID) continue
 
     const sessionStatus = sessionStatuses?.[sessionID]?.type
-    const sessionIsRunning = sessionStatus !== undefined && sessionStatus !== "idle"
+    const sessionIsRunning = sessionStatus !== undefined && isActiveSessionStatus(sessionStatus)
     const runtime = now - startedAt.getTime()
 
     if (!task.progress?.lastUpdate) {
@@ -130,7 +130,7 @@ export async function checkAndInterruptStaleTasks(args: {
 
       const staleMinutes = Math.round(runtime / 60000)
       task.status = "cancelled"
-      task.error = `Stale timeout (no activity for ${staleMinutes}min since start)`
+      task.error = `Stale timeout (no activity for ${staleMinutes}min since start). This is a FINAL cancellation - do NOT create a replacement task. If the timeout is too short, increase 'background_task.staleTimeoutMs' in .opencode/oh-my-opencode.json.`
       task.completedAt = new Date()
 
       if (task.concurrencyKey) {
@@ -159,10 +159,10 @@ export async function checkAndInterruptStaleTasks(args: {
     if (timeSinceLastUpdate <= staleTimeoutMs) continue
     if (task.status !== "running") continue
 
-    const staleMinutes = Math.round(timeSinceLastUpdate / 60000)
-    task.status = "cancelled"
-    task.error = `Stale timeout (no activity for ${staleMinutes}min)`
-    task.completedAt = new Date()
+     const staleMinutes = Math.round(timeSinceLastUpdate / 60000)
+     task.status = "cancelled"
+     task.error = `Stale timeout (no activity for ${staleMinutes}min). This is a FINAL cancellation - do NOT create a replacement task. If the timeout is too short, increase 'background_task.staleTimeoutMs' in .opencode/oh-my-opencode.json.`
+     task.completedAt = new Date()
 
     if (task.concurrencyKey) {
       concurrencyManager.release(task.concurrencyKey)

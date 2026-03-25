@@ -2,6 +2,11 @@ export type FallbackEntry = {
   providers: string[];
   model: string;
   variant?: string; // Entry-specific variant (e.g., GPT→high, Opus→max)
+  reasoningEffort?: string;
+  temperature?: number;
+  top_p?: number;
+  maxTokens?: number;
+  thinking?: { type: "enabled" | "disabled"; budgetTokens?: number };
 };
 
 export type ModelRequirement = {
@@ -257,6 +262,10 @@ export const CATEGORY_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
   },
   quick: {
     fallbackChain: [
+      {
+        providers: ["openai", "github-copilot", "opencode"],
+        model: "gpt-5.4-mini",
+      },
       {
         providers: ["anthropic", "github-copilot", "opencode"],
         model: "claude-haiku-4-5",
