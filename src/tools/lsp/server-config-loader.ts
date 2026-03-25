@@ -37,9 +37,15 @@ export function loadJsonFile<T>(path: string): T | null {
 export function getConfigPaths(): { project: string; user: string; opencode: string } {
   const cwd = process.cwd()
   const configDir = getOpenCodeConfigDir({ binary: "opencode" })
+  const talosProject = detectConfigFile(join(cwd, ".opencode", "talos"))
+  const talosUser = detectConfigFile(join(configDir, "talos"))
   return {
-    project: detectConfigFile(join(cwd, ".opencode", "oh-my-opencode")).path,
-    user: detectConfigFile(join(configDir, "oh-my-opencode")).path,
+    project: talosProject.format !== "none"
+      ? talosProject.path
+      : detectConfigFile(join(cwd, ".opencode", "oh-my-opencode")).path,
+    user: talosUser.format !== "none"
+      ? talosUser.path
+      : detectConfigFile(join(configDir, "oh-my-opencode")).path,
     opencode: detectConfigFile(join(configDir, "opencode")).path,
   }
 }

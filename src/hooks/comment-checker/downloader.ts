@@ -48,12 +48,12 @@ export function getCacheDir(): string {
   if (process.platform === "win32") {
     const localAppData = process.env.LOCALAPPDATA || process.env.APPDATA
     const base = localAppData || join(homedir(), "AppData", "Local")
-    return join(base, "oh-my-opencode", "bin")
+    return join(base, "talos", "bin")
   }
 
   const xdgCache = process.env.XDG_CACHE_HOME
   const base = xdgCache || join(homedir(), ".cache")
-  return join(base, "oh-my-opencode", "bin")
+  return join(base, "talos", "bin")
 }
 
 /**
@@ -113,7 +113,7 @@ export async function downloadCommentChecker(): Promise<string | null> {
   const downloadUrl = `https://github.com/${REPO}/releases/download/v${version}/${assetName}`
   
   debugLog(`Downloading from: ${downloadUrl}`)
-  log(`[oh-my-opencode] Downloading comment-checker binary...`)
+  log(`[talos] Downloading comment-checker binary...`)
   
   try {
     // Ensure cache directory exists
@@ -139,14 +139,14 @@ export async function downloadCommentChecker(): Promise<string | null> {
     ensureExecutable(binaryPath)
     
     debugLog(`Successfully downloaded binary to: ${binaryPath}`)
-    log(`[oh-my-opencode] comment-checker binary ready.`)
+    log(`[talos] comment-checker binary ready.`)
     
     return binaryPath
     
   } catch (err) {
     debugLog(`Failed to download: ${err}`)
-    log(`[oh-my-opencode] Failed to download comment-checker: ${err instanceof Error ? err.message : err}`)
-    log(`[oh-my-opencode] Comment checking disabled.`)
+    log(`[talos] Failed to download comment-checker: ${err instanceof Error ? err.message : err}`)
+    log(`[talos] Comment checking disabled.`)
     return null
   }
 }

@@ -1,4 +1,4 @@
-export const PLUGIN_NAME = "oh-my-opencode"
-export const CONFIG_BASENAME = "oh-my-opencode"
-export const LOG_FILENAME = "oh-my-opencode.log"
-export const CACHE_DIR_NAME = "oh-my-opencode"
+export const PLUGIN_NAME = "talos"
+export const CONFIG_BASENAME = "talos"
+export const LOG_FILENAME = "talos.log"
+export const CACHE_DIR_NAME = "talos"

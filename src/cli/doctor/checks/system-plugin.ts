@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs"
 
-import { PACKAGE_NAME } from "../constants"
+import { PACKAGE_NAME, LEGACY_PACKAGE_NAME } from "../constants"
 import { getOpenCodeConfigPaths, parseJsonc } from "../../../shared"
 
 export interface PluginInfo {
@@ -35,7 +35,10 @@ function findPluginEntry(entries: string[]): { entry: string; isLocalDev: boolea
     if (entry === PACKAGE_NAME || entry.startsWith(`${PACKAGE_NAME}@`)) {
       return { entry, isLocalDev: false }
     }
-    if (entry.startsWith("file://") && entry.includes(PACKAGE_NAME)) {
+    if (entry === LEGACY_PACKAGE_NAME || entry.startsWith(`${LEGACY_PACKAGE_NAME}@`)) {
+      return { entry, isLocalDev: false }
+    }
+    if (entry.startsWith("file://") && (entry.includes(PACKAGE_NAME) || entry.includes(LEGACY_PACKAGE_NAME))) {
       return { entry, isLocalDev: true }
     }
   }

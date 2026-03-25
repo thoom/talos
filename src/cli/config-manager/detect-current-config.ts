@@ -56,7 +56,8 @@ function detectProvidersFromOmoConfig(): {
 }
 
 export function detectCurrentConfig(): DetectedConfig {
-  const PACKAGE_NAME = "oh-my-opencode"
+  const PACKAGE_NAME = "talos"
+  const LEGACY_PACKAGE_NAME = "oh-my-opencode"
   const result: DetectedConfig = {
     isInstalled: false,
     hasClaude: true,
@@ -82,7 +83,7 @@ export function detectCurrentConfig(): DetectedConfig {
 
   const openCodeConfig = parseResult.config
   const plugins = openCodeConfig.plugin ?? []
-  result.isInstalled = plugins.some((plugin) => plugin.startsWith(PACKAGE_NAME))
+  result.isInstalled = plugins.some((plugin) => plugin.startsWith(PACKAGE_NAME) || plugin.startsWith(LEGACY_PACKAGE_NAME))
 
   if (!result.isInstalled) {
     return result

@@ -5,7 +5,7 @@
  * Format: [SYSTEM DIRECTIVE: OH-MY-OPENCODE - {TYPE}]
  */
 
-export const SYSTEM_DIRECTIVE_PREFIX = "[SYSTEM DIRECTIVE: OH-MY-OPENCODE"
+export const SYSTEM_DIRECTIVE_PREFIX = "[SYSTEM DIRECTIVE: TALOS"
 
 /**
  * Creates a system directive header with the given type.

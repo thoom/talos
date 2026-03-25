@@ -47,12 +47,12 @@ export function getCacheDir(): string {
   if (process.platform === "win32") {
     const localAppData = process.env.LOCALAPPDATA || process.env.APPDATA
     const base = localAppData || join(homedir(), "AppData", "Local")
-    return join(base, "oh-my-opencode", "bin")
+    return join(base, "talos", "bin")
   }
 
   const xdgCache = process.env.XDG_CACHE_HOME
   const base = xdgCache || join(homedir(), ".cache")
-  return join(base, "oh-my-opencode", "bin")
+  return join(base, "talos", "bin")
 }
 
 export function getBinaryName(): string {

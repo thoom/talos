@@ -32,7 +32,7 @@ export async function runCliInstaller(args: InstallArgs, version: string): Promi
     }
     console.log()
     printInfo(
-      "Usage: bunx oh-my-opencode install --no-tui --claude=<no|yes|max20> --gemini=<no|yes> --copilot=<no|yes>",
+      "Usage: bunx talos install --no-tui --claude=<no|yes|max20> --gemini=<no|yes> --copilot=<no|yes>",
     )
     console.log()
     return 1
@@ -65,7 +65,7 @@ export async function runCliInstaller(args: InstallArgs, version: string): Promi
 
   const config = argsToConfig(args)
 
-  printStep(step++, totalSteps, "Adding oh-my-opencode plugin...")
+  printStep(step++, totalSteps, "Adding talos plugin...")
   const pluginResult = await addPluginToOpenCodeConfig(version)
   if (!pluginResult.success) {
     printError(`Failed: ${pluginResult.error}`)

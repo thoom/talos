@@ -82,9 +82,9 @@ export async function checkSystem(): Promise<CheckResult> {
 
   if (!pluginInfo.registered) {
     issues.push({
-      title: "oh-my-opencode is not registered",
+      title: "talos is not registered",
       description: "Plugin entry is missing from OpenCode configuration.",
-      fix: "Run: bunx oh-my-opencode install",
+      fix: "Run: bunx talos install",
       severity: "error",
       affects: ["all agents"],
     })
